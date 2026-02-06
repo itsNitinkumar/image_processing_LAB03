@@ -2,7 +2,7 @@
 
 Implementation of various image processing techniques from **Gonzalez & Woods - Chapter 3: Intensity Transformations and Spatial Filtering**
 
-## 🎯 Overview
+## Overview
 
 This project implements fundamental image processing techniques including:
 - **Intensity Transformations**: Negative, Log, Gamma correction, Bit-plane slicing
@@ -12,7 +12,7 @@ This project implements fundamental image processing techniques including:
 
 All implementations are done **manually from scratch** using NumPy for educational purposes, without relying on high-level OpenCV functions.
 
-## 🚀 QuickStart
+## QuickStart
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -50,10 +50,3 @@ python main.py
 
 - Gonzalez, R. C., & Woods, R. E. (2018). *Digital Image Processing* (4th ed.). Pearson.
 - Chapter 3: Intensity Transformations and Spatial Filtering
-
-## 👤 Author
-
-**Nitin** <br>
-**Anas** <br>
-**Abhishek**
-

@@ -1,0 +1,319 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+\usepackage{listings}
+\usepackage{float}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Digital Image Processing: Intensity Transformations and Spatial Filtering\\
+{\footnotesize Laboratory Assignment 3}}
+
+\author{
+    \IEEEauthorblockA{
+        Abhishek Misal  - 202352302 \\
+        Nitin kumar  - 202352323 \\
+        Mohd Anas - 202352322
+    }
+}
+
+\maketitle
+
+\begin{abstract}
+This report presents the implementation and analysis of fundamental digital image processing techniques based on Chapter 3 of Gonzalez and Woods. The work encompasses intensity transformations, histogram processing, and spatial filtering methods. All implementations are developed from scratch using NumPy without relying on high-level OpenCV functions, demonstrating a deep understanding of underlying algorithms. The project includes ten comprehensive tasks covering image negatives, logarithmic transformations, gamma correction, bit-plane slicing, histogram equalization, spatial filtering, and mixed spatial enhancement techniques.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Image Processing, Intensity Transformation, Histogram Equalization, Spatial Filtering, Image Enhancement
+\end{IEEEkeywords}
+
+\section{Introduction}
+Digital image processing plays a crucial role in various applications ranging from medical imaging to computer vision. This laboratory assignment implements fundamental image enhancement techniques that form the foundation of more advanced processing methods. The primary objectives include understanding and implementing intensity transformations, histogram-based methods, and spatial filtering techniques.
+
+Image enhancement is the process of manipulating an image to improve its quality or extract information. Two broad categories exist: spatial domain methods that operate directly on pixels, and frequency domain methods. This work focuses on spatial domain techniques, which are intuitive and computationally efficient for many applications.
+
+\section{Methodology}
+
+\subsection{Intensity Transformations}
+
+\subsubsection{Image Negatives}
+The negative transformation is given by:
+\begin{equation}
+s = L - 1 - r
+\end{equation}
+where $r$ is the input intensity level, $s$ is the output intensity level, and $L$ is the number of intensity levels (256 for 8-bit images). This transformation is particularly useful for enhancing white or gray detail embedded in dark regions of an image, such as in medical X-ray imaging.
+
+\subsubsection{Logarithmic Transformation}
+The logarithmic transformation expands low-intensity values while compressing high-intensity values:
+\begin{equation}
+s = c \log(1 + r)
+\end{equation}
+where $c$ is a scaling constant. This transformation is ideal for displaying images with large dynamic ranges, such as Fourier spectrum images.
+
+\subsubsection{Gamma Correction}
+Power-law transformations have the form:
+\begin{equation}
+s = c \cdot r^{\gamma}
+\end{equation}
+where $\gamma$ controls the shape of the curve. Values of $\gamma < 1$ brighten the image, while $\gamma > 1$ darkens it. This technique is essential for correcting display characteristics and adjusting image brightness.
+
+\subsubsection{Bit-Plane Slicing}
+Bit-plane slicing decomposes an 8-bit image into eight binary images, each representing a specific bit position. Higher-order bit planes contain more visually significant information, while lower-order planes contain subtle details.
+
+\subsection{Histogram Processing}
+
+\subsubsection{Global Histogram Equalization}
+Histogram equalization enhances contrast by redistributing intensity values across the full dynamic range. The transformation is based on the cumulative distribution function (CDF):
+\begin{equation}
+s_k = (L-1) \sum_{j=0}^{k} p_r(r_j)
+\end{equation}
+where $p_r(r_j)$ is the probability density function of intensity level $r_j$.
+
+\subsubsection{Local Histogram Equalization}
+Local histogram equalization applies the equalization process within a sliding window, allowing for adaptive enhancement based on local statistics. This technique is superior to global equalization when different regions of an image require different enhancement levels.
+
+\subsection{Spatial Filtering}
+
+\subsubsection{Smoothing Filters}
+Smoothing filters reduce noise and blur images by averaging neighboring pixels. Two types were implemented:
+
+\textbf{Box Filter:} A simple averaging filter with equal weights:
+\begin{equation}
+w = \frac{1}{m \times n} \begin{bmatrix}
+1 & 1 & \cdots & 1 \\
+1 & 1 & \cdots & 1 \\
+\vdots & \vdots & \ddots & \vdots \\
+1 & 1 & \cdots & 1
+\end{bmatrix}
+\end{equation}
+
+\textbf{Gaussian Filter:} Weights decrease with distance from center:
+\begin{equation}
+G(x,y) = \frac{1}{2\pi\sigma^2} e^{-\frac{x^2+y^2}{2\sigma^2}}
+\end{equation}
+
+\subsubsection{Sharpening Filters}
+Sharpening enhances edges and fine details. The Laplacian operator is an isotropic derivative operator:
+\begin{equation}
+\nabla^2 f = \frac{\partial^2 f}{\partial x^2} + \frac{\partial^2 f}{\partial y^2}
+\end{equation}
+
+Sharpened image is obtained by:
+\begin{equation}
+g(x,y) = f(x,y) - c \cdot \nabla^2 f(x,y)
+\end{equation}
+
+\subsubsection{Sobel Gradient}
+The Sobel operator computes gradient magnitude using two kernels:
+\begin{equation}
+G_x = \begin{bmatrix}
+-1 & 0 & 1 \\
+-2 & 0 & 2 \\
+-1 & 0 & 1
+\end{bmatrix}, \quad
+G_y = \begin{bmatrix}
+-1 & -2 & -1 \\
+0 & 0 & 0 \\
+1 & 2 & 1
+\end{bmatrix}
+\end{equation}
+
+Gradient magnitude:
+\begin{equation}
+M(x,y) = \sqrt{G_x^2 + G_y^2}
+\end{equation}
+
+\subsubsection{Unsharp Masking}
+Unsharp masking enhances edges by subtracting a blurred version:
+\begin{equation}
+g(x,y) = f(x,y) + k \cdot (f(x,y) - \bar{f}(x,y))
+\end{equation}
+where $\bar{f}(x,y)$ is the blurred image and $k$ controls enhancement strength.
+
+\subsection{Mixed Spatial Enhancement}
+Complex enhancement tasks often require combining multiple techniques. The implemented mixed spatial enhancement pipeline includes:
+\begin{enumerate}
+    \item Laplacian edge detection
+    \item Sobel gradient computation with smoothing
+    \item Product of Laplacian and Sobel results
+    \item Addition to original image
+    \item Power-law transformation for final enhancement
+\end{enumerate}
+
+\section{Implementation Details}
+
+\subsection{Software Architecture}
+The implementation follows modular design principles with clear separation of concerns:
+
+\begin{itemize}
+    \item \texttt{transformations.py}: Intensity transformation functions
+    \item \texttt{histogram.py}: Histogram processing methods
+    \item \texttt{filters.py}: Spatial filtering operations
+    \item \texttt{utils.py}: Common utilities and convolution engine
+    \item \texttt{config.py}: Configuration parameters and constants
+    \item \texttt{main.py}: Main execution script for all tasks
+\end{itemize}
+
+\subsection{Convolution Implementation}
+All spatial filtering operations utilize a custom convolution function that handles boundary conditions through zero-padding. The implementation ensures efficient computation while maintaining numerical accuracy.
+
+\subsection{Development Environment}
+\begin{itemize}
+    \item Programming Language: Python 3.8+
+    \item Core Libraries: NumPy for numerical operations, Matplotlib for visualization
+    \item Version Control: Git (hosted on GitHub)
+    \item Development Practice: Modular, well-documented code with comprehensive testing
+\end{itemize}
+
+\section{Results and Analysis}
+
+\subsection{Task 1: Image Negatives}
+The negative transformation successfully enhanced white detail in a dark mammogram X-ray image. This technique is particularly valuable in medical imaging where radiologists often prefer to view bone structures as dark regions on a light background.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{../results/task1_comparison.png}
+\caption{Image negative transformation applied to mammogram X-ray. Left: Original dark image. Right: Negative transformation revealing enhanced detail.}
+\label{fig:task1}
+\end{figure}
+
+\subsection{Task 2: Log Transformation}
+Logarithmic transformation effectively displayed the Fourier spectrum with compressed dynamic range, making all frequency components visible. Without this transformation, only the DC component (center) would be visible due to its high magnitude.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{../results/task2_comparison.png}
+\caption{Logarithmic transformation of Fourier spectrum. The transformation compresses the dynamic range, revealing all frequency components.}
+\label{fig:task2}
+\end{figure}
+
+\subsection{Task 3: Gamma Correction}
+Multiple gamma values were tested for both brightening ($\gamma = 0.3, 0.4, 0.6$) and darkening ($\gamma = 3.0, 4.0, 5.0$) operations. Results demonstrated the effectiveness of power-law transformations in adjusting overall image brightness while maintaining relative contrast relationships.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{../results/task3a_brightening.png}
+\caption{Gamma correction for brightening dark spine image. Various gamma values ($\gamma < 1$) progressively brighten the image.}
+\label{fig:task3a}
+\end{figure}
+
+\subsection{Task 4: Bit-Plane Slicing}
+Analysis of bit planes revealed that the four most significant bit planes (planes 4-7) contain the majority of visually important information. Lower-order planes primarily capture noise and subtle texture details.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{../results/task4_bitplanes.png}
+\caption{Eight bit planes extracted from the input image. Higher-order planes (bottom rows) contain more significant visual information.}
+\label{fig:task4}
+\end{figure}
+
+\subsection{Task 5 \& 6: Histogram Equalization}
+Global histogram equalization dramatically improved contrast in low-contrast images. Local histogram equalization proved superior for images with varying illumination, as it adapted to local intensity distributions. The sliding window approach (41×41 pixels) provided excellent detail enhancement in both dark and bright regions.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{../results/task5_histogram_eq.png}
+\caption{Global histogram equalization results on multiple test images showing significant contrast enhancement.}
+\label{fig:task5}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{../results/task6_local_vs_global.png}
+\caption{Comparison between global and local histogram equalization. Local method provides superior detail enhancement in regions with varying illumination.}
+\label{fig:task6}
+\end{figure}
+
+\subsection{Task 7: Smoothing Filters}
+Box filters and Gaussian filters both reduced noise effectively. Gaussian filters produced smoother results with better edge preservation compared to box filters. Larger kernel sizes increased blurring, demonstrating the trade-off between noise reduction and detail preservation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{../results/task7_smoothing_filters.png}
+\caption{Smoothing filters applied to noisy image. Both box and Gaussian filters with various kernel sizes demonstrate progressive noise reduction.}
+\label{fig:task7}
+\end{figure}
+
+\subsection{Task 8: Laplacian Sharpening}
+The Laplacian filter successfully detected edges as zero-crossings. Sharpening by subtracting the Laplacian from the original image enhanced fine details. The scaling constant $c$ controlled enhancement strength, with higher values producing more pronounced sharpening effects.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{../results/task8_laplacian_sharpening.png}
+\caption{Laplacian sharpening with different scaling constants. Original image, Laplacian filtered, and two sharpened versions with different enhancement strengths.}
+\label{fig:task8}
+\end{figure}
+
+\subsection{Task 9: Unsharp Masking}
+Unsharp masking provided superior sharpening results compared to simple Laplacian sharpening. The technique enhanced edges while maintaining better control over noise amplification. Different values of $k$ (1.0, 4.5) demonstrated the adjustable nature of enhancement strength.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{../results/task9_unsharp_masking.png}
+\caption{Unsharp masking technique. Shows original, blurred, mask, and enhanced results with different strength parameters.}
+\label{fig:task9}
+\end{figure}
+
+\subsection{Task 10: Mixed Spatial Enhancement}
+The combined approach demonstrated the power of multi-stage processing. The sequence of Laplacian detection, Sobel gradient computation, multiplication, and power-law transformation produced highly enhanced images with strong edge definition. This sophisticated technique is suitable for applications requiring maximum detail visibility, such as medical imaging and industrial inspection.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{../results/task10_all_steps.png}
+\caption{Complete mixed spatial enhancement pipeline showing all intermediate steps: original, Laplacian, Sobel gradient, multiplication, addition, and final power-law transformation.}
+\label{fig:task10a}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{../results/task10_final_comparison.png}
+\caption{Final comparison of mixed spatial enhancement. The technique produces superior edge definition and detail visibility.}
+\label{fig:task10b}
+\end{figure}
+
+\section{Challenges and Solutions}
+
+\subsection{Boundary Conditions}
+Spatial filtering near image boundaries required careful handling. Zero-padding was implemented to maintain consistent output dimensions while avoiding artifacts.
+
+\subsection{Numerical Overflow}
+Operations like logarithmic transformation and histogram equalization can produce values outside valid ranges. Clipping and normalization strategies ensured all output values remained within [0, 255].
+
+\subsection{Performance Optimization}
+Initial implementations were computationally intensive. Vectorized operations using NumPy replaced explicit loops, significantly improving performance.
+
+\section{Conclusion}
+This laboratory assignment successfully implemented and analyzed fundamental image processing techniques from the spatial domain. The implementations demonstrate that complex enhancement can be achieved through proper application of basic operations. Key findings include:
+
+\begin{itemize}
+    \item Intensity transformations provide simple yet effective enhancement for specific image types
+    \item Local histogram equalization outperforms global methods for non-uniform illumination
+    \item Combining multiple techniques yields superior results compared to single-method approaches
+    \item Parameter selection significantly impacts enhancement quality and requires careful tuning
+\end{itemize}
+
+The manual implementation approach enhanced understanding of algorithmic details often hidden by high-level functions. Future work could explore frequency domain methods, advanced edge-preserving filters, and machine learning-based enhancement techniques.
+
+\section{Acknowledgment}
+We would like to express our sincere gratitude to Professor Jignesh Patel for his guidance for this laboratory assignment. His insights and expertise in digital image processing have been instrumental in the successful completion of this work.
+
+\begin{thebibliography}{00}
+\bibitem{github}
+GitHub Repository: Image Processing LAB03, \url{https://github.com/itsNitinkumar/image_processing_LAB03}
+\end{thebibliography}
+
+\end{document}
